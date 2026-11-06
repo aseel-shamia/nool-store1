@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>NOOL Admin</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Syne:wght@800&display=swap">
+<style>
+/* Layout: owner dashboard. Settings and product list on one side, the product editor with a live fit preview on the other. */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --chip:#f1f2f5; --ink:#141619; --ink-2:#5d626a; --line:#d9dde3;
+  --ember:#d9682b; --ember-2:#f0884a; --ok:#2f8f5b; --bad:#c0392b; --studio:#ecebe8;
+  --f-display:"Alexandria","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Alexandria",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root{ --bg:#121215; --surface:#1b1b1f; --chip:#24242a; --ink:#ecebef; --ink-2:#92919b; --line:#2c2c33; color-scheme:dark } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px;border-radius:6px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:1280px;margin:0 auto}
+.ltr{direction:ltr;unicode-bidi:isolate}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .inner{display:flex;align-items:center;gap:12px;min-height:64px;flex-wrap:wrap;padding-block:8px}
+.brand{font-family:"Syne",var(--f-display);font-weight:800;letter-spacing:.28em;font-size:18px}
+.tag{font-size:11px;font-family:var(--f-mono);background:var(--ink);color:var(--bg);border-radius:6px;padding:2px 8px}
+.sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--ember);border-color:var(--ember);color:#fff}
+.btn.primary:hover{background:var(--ember-2)}
+.btn.dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+main{padding-block:24px 60px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h2{font-family:var(--f-display);font-size:16px;margin:0 0 4px}
+.panel .hint{color:var(--ink-2);font-size:13px;margin:0 0 14px}
+.stack{display:grid;gap:20px;min-width:0}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font-size:12px;color:var(--ink-2);font-weight:500}
+.field input[type=text],.field input[type=number],.field input[type=password],.field select{width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px}
+.check input{accent-color:var(--ember);width:16px;height:16px}
+.list{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--surface)}
+.item.sel{border-color:var(--ember);box-shadow:0 0 0 1px var(--ember)}
+.item.off{opacity:.5}
+.thumb{width:54px;height:54px;border-radius:10px;background:var(--studio);display:grid;place-items:center;overflow:hidden}
+.thumb img{max-width:88%;max-height:88%;object-fit:contain}
+.thumb.photo img{max-width:none;max-height:none;width:100%;height:100%;object-fit:cover}
+.item h4{margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item small{color:var(--ink-2);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acts{display:flex;gap:4px}
+.ib{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--chip);display:grid;place-items:center}
+.ib:hover{border-color:var(--ink-2)}
+.ib.danger:hover{color:var(--bad);border-color:var(--bad)}
+.badge{font-size:10px;border-radius:4px;padding:0 5px;margin-inline-start:6px;background:var(--chip);color:var(--ink-2);border:1px solid var(--line)}
+.drop{border:1.5px dashed var(--line);border-radius:14px;display:grid;place-items:center;text-align:center;padding:14px;cursor:pointer;min-height:200px;background:
+  repeating-conic-gradient(var(--chip) 0 25%,var(--surface) 0 50%) 0 0/18px 18px;position:relative}
+.drop.over{border-color:var(--ember)}
+.drop img{max-height:240px;max-width:100%;object-fit:contain}
+.drop .ph{color:var(--ink-2);font-size:13px;background:var(--surface);padding:10px 14px;border-radius:10px}
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:18px}
+.fitbox{display:grid;gap:10px;align-content:start}
+.booth{background:radial-gradient(120% 70% at 50% 18%,#f4f3f0,#d6d3cc);border-radius:14px;display:grid;place-items:center;padding:12px 0;overflow:hidden}
+.model{position:relative;height:420px;aspect-ratio:254/1100}
+.model>img:not(.g){position:absolute;inset:0;width:100%;height:100%}
+.model .g{position:absolute;right:auto;bottom:auto;max-width:none;max-height:none;object-fit:contain;object-position:50% 0}
+.model .g.top{left:-9%;top:14.4%;width:118%;height:24.5%}
+.model .g.outer{left:-15%;top:13.6%;width:130%;height:28.5%}
+.model .g.bottom{left:0;top:31.8%;width:100%;height:60%}
+.model .g.cur{outline:1px dashed rgba(217,104,43,.7)}
+.slider{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;color:var(--ink-2)}
+.slider input{accent-color:var(--ember);width:100%}
+.slider output{font-family:var(--f-mono);min-width:38px;text-align:end}
+.formacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.steps{margin:0;padding-inline-start:20px;color:var(--ink-2);display:grid;gap:6px}
+.steps b{color:var(--ink)}
+code{font-family:var(--f-mono);background:var(--chip);padding:1px 6px;border-radius:6px;font-size:12px}
+.note{font-size:12px;color:var(--ink-2)}
+.status{font-size:12px;font-family:var(--f-mono);color:var(--ink-2)}
+.status.warn{color:var(--bad)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,30px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;z-index:100;transition:.3s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.confirm{display:none;gap:6px;align-items:center;font-size:12px}
+.item.asking .confirm{display:flex}
+.item.asking .acts{display:none}
+@media (max-width:980px){ .layout{grid-template-columns:1fr} }
+@media (max-width:560px){ .editor{grid-template-columns:1fr} .two,.three{grid-template-columns:1fr 1fr} .model{height:360px} }
+</style>
+</head>
+<body>
+
+
+<div dir="rtl" lang="ar">
+<header class="wrap"><div class="inner">
+  <span class="brand ltr" id="hdrName">NOOL</span><span class="tag">ADMIN</span>
+  <span class="status" id="status"></span>
+  <span class="sp"></span>
+  <a class="btn" id="previewBtn" href="index.html#preview" target="_blank" rel="noopener">معاينة المتجر</a>
+  <button class="btn" id="exportBtn">نزّل نسخة</button>
+  <button class="btn dark" id="publishTop">انشر على الموقع</button>
+</div></header>
+
+<main class="wrap"><div class="inner layout">
+  <div class="stack">
+    <section class="panel">
+      <h2>إعدادات الموقع</h2>
+      <p class="hint">هاي بتظهر بالمتجر عند الزبائن. هم ما بيشوفوا هالصفحة.</p>
+      <div class="two">
+        <div class="field"><label for="siteName">اسم الموقع</label><input type="text" id="siteName" maxlength="24" class="ltr"></div>
+        <div class="field"><label for="modelFile">صورة المودل (PNG شفاف)</label><input type="file" id="modelFile" accept="image/*"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px">
+        <div><h2>المنتجات</h2><p class="hint" style="margin:0" id="countLine"></p></div>
+        <button class="btn primary" id="newBtn">+ قطعة جديدة</button>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>معلومات التواصل</h2>
+      <p class="hint">بتظهر بالفوتر وصفحة "تواصل معنا"، والطلبات بتوصل على رقم الواتساب.</p>
+      <div class="two">
+        <div class="field"><label for="s_whatsapp">واتساب (مع رمز الدولة، بدون +)</label><input type="text" id="s_whatsapp" class="ltr" data-s="whatsapp" placeholder="970590000000"></div>
+        <div class="field"><label for="s_phone">رقم الهاتف</label><input type="text" id="s_phone" class="ltr" data-s="phone"></div>
+        <div class="field"><label for="s_email">الإيميل</label><input type="text" id="s_email" class="ltr" data-s="email"></div>
+        <div class="field"><label for="s_instagram">إنستغرام (بدون @)</label><input type="text" id="s_instagram" class="ltr" data-s="instagram"></div>
+        <div class="field"><label for="s_cityAr">العنوان بالعربي</label><input type="text" id="s_cityAr" data-s="city.ar"></div>
+        <div class="field"><label for="s_cityEn">العنوان بالإنجليزي</label><input type="text" id="s_cityEn" class="ltr" data-s="city.en"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>التوصيل والإرجاع</h2>
+      <div id="regions" style="display:grid;gap:10px"></div>
+      <div class="two" style="margin-top:12px">
+        <div class="field"><label for="s_freeOver">توصيل مجاني فوق (₪)</label><input type="number" id="s_freeOver" class="ltr" data-s="freeOver" data-num></div>
+        <div class="field"><label for="s_returnDays">أيام الإرجاع</label><input type="number" id="s_returnDays" class="ltr" data-s="returnDays" data-num></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>طرق الدفع</h2>
+      <p class="hint">فعّل الطرق اللي بدك إياها، وحط معلومات الحساب. ما في ولا طريقة بتطلب من الزبون بيانات البطاقة على الموقع.</p>
+      <div style="display:grid;gap:12px">
+        <label class="check"><input type="checkbox" data-pay="cod"> الدفع عند الاستلام</label>
+        <label class="check"><input type="checkbox" data-pay="jawwal"> جوال باي</label>
+        <div class="two"><div class="field"><label for="s_jn">رقم المحفظة</label><input type="text" id="s_jn" class="ltr" data-s="jawwalNumber"></div><div class="field"><label for="s_jname">اسم صاحب المحفظة</label><input type="text" id="s_jname" data-s="jawwalName"></div></div>
+        <label class="check"><input type="checkbox" data-pay="bop"> بنك فلسطين</label>
+        <div class="two"><div class="field"><label for="s_biban">رقم الحساب أو IBAN</label><input type="text" id="s_biban" class="ltr" data-s="bopIban"></div><div class="field"><label for="s_bname">اسم صاحب الحساب</label><input type="text" id="s_bname" data-s="bopName"></div></div>
+        <label class="check"><input type="checkbox" data-pay="paypal"> PayPal</label>
+        <label class="check"><input type="checkbox" data-pay="visa"> فيزا / ماستركارد (عن طريق PayPal)</label>
+        <div class="field"><label for="s_pp">PayPal Client ID</label><input type="text" id="s_pp" class="ltr" data-s="paypalClientId" placeholder="test"></div>
+        <p class="note">PayPal والفيزا بيندفعوا جوّا الموقع عن طريق بوابة PayPal الرسمية. كلمة <code>test</code> يعني وضع الاختبار (Sandbox)، ما في فلوس حقيقية. للدفع الحقيقي: من <b>developer.paypal.com ← Apps &amp; Credentials ← Live</b> انسخ الـ Client ID وحطه هون، والفلوس بتنزل بحساب PayPal تبعك.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>أكواد الخصم</h2>
+      <div id="coupons" style="display:grid;gap:8px"></div>
+      <button class="btn" id="addCoupon" style="margin-top:10px">+ كود جديد</button>
+    </section>
+
+    <section class="panel" id="dbPanel">
+      <h2>قاعدة البيانات (Firebase)</h2>
+      <p class="hint">لما تربطها، كل الطلبات بتنحفظ بمكان واحد وبتشوفها هون من أي جهاز، والكميات بتنقص أوتوماتيك مع كل طلب. مجانية للمتاجر الصغيرة.</p>
+      <details class="note" style="margin-bottom:12px"><summary style="cursor:pointer;color:var(--ink)">كيف أربطها؟ (10 دقايق، مرة وحدة)</summary>
+        <ol class="steps" style="margin-top:8px">
+          <li>افتح <b>console.firebase.google.com</b> وسجّل بحساب Google، واضغط <b>Create a project</b>. سمّيه <code>nool-store</code>. Google Analytics مش ضروري.</li>
+          <li>من القائمة: <b>Build ← Firestore Database ← Create database</b>، اختار أقرب منطقة (مثلاً <code>eur3</code>)، و<b>Start in production mode</b>.</li>
+          <li><b>Build ← Authentication ← Get started ← Email/Password</b> فعّله. بعدين تبويب <b>Users ← Add user</b>: حط إيميلك وكلمة سر، هاد حساب الأدمن.</li>
+          <li>بنفس Authentication: <b>Settings ← Authorized domains ← Add domain</b>: ضيف <code>aseel-shamia.github.io</code>.</li>
+          <li><b>Project settings</b> (الترس) ← تحت <b>Your apps</b> اضغط <b>&lt;/&gt;</b> (Web)، سمّيه وسجّله، وانسخ الـ <code>firebaseConfig</code> كامل والصقه تحت.</li>
+          <li>اكتب إيميل الأدمن تحت، وانسخ <b>قواعد الحماية</b> اللي بتطلع، والصقها بـ <b>Firestore ← Rules</b> واضغط <b>Publish</b>.</li>
+          <li>اضغط <b>انشر على الموقع</b>، وبعدين سجّل دخول هون واضغط <b>ارفع الكميات</b>.</li>
+        </ol>
+      </details>
+      <div class="field"><label for="fbPaste">الصق firebaseConfig هون</label><textarea id="fbPaste" rows="5" class="ltr" style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:12px/1.5 var(--f-mono)" placeholder="const firebaseConfig = { apiKey: '...', authDomain: '...', projectId: '...', appId: '...' };"></textarea></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="btn" id="fbSave">احفظ الإعدادات</button><span class="status" id="fbCfgStatus"></span></div>
+      <div class="two" style="margin-top:14px">
+        <div class="field"><label for="fbAdmin">إيميل الأدمن (نفس اللي بـ Authentication)</label><input type="text" id="fbAdmin" class="ltr" data-s="firebase.adminEmail" placeholder="you@gmail.com"></div>
+        <div class="field"><label for="fbPass">كلمة السر</label><input type="password" id="fbPass" class="ltr" autocomplete="current-password"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+        <button class="btn dark" id="fbLogin">سجّل دخول</button><button class="btn" id="fbLogout" hidden>سجّل خروج</button>
+        <button class="btn" id="fbStock" hidden>ارفع الكميات لقاعدة البيانات</button><span class="status" id="fbStatus">مش مربوطة</span>
+      </div>
+      <details style="margin-top:14px"><summary style="cursor:pointer;font-size:13px">قواعد الحماية (Firestore Rules)</summary>
+        <textarea id="fbRules" rows="14" class="ltr" readonly style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:12px/1.5 var(--f-mono)"></textarea>
+        <button class="btn" id="copyRules" style="margin-top:8px">انسخ القواعد</button></details>
+    </section>
+
+    <section class="panel">
+      <h2>الإشعارات والإحصائيات</h2>
+      <div class="field"><label for="s_w3f">مفتاح Web3Forms (إيميل لكل طلب جديد)</label><input type="text" id="s_w3f" class="ltr" data-s="web3formsKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+      <p class="note">افتح <b>web3forms.com</b>، اكتب إيميلك واضغط <b>Create Access Key</b>. المفتاح بيوصلك على الإيميل، والصقه هون. بعدها كل طلب جديد بيوصلك بتفاصيله على الإيميل.</p>
+      <div class="field" style="margin-top:12px"><label for="s_ga">Google Analytics (Measurement ID)</label><input type="text" id="s_ga" class="ltr" data-s="gaId" placeholder="G-XXXXXXXXXX"></div>
+      <p class="note">من <b>analytics.google.com</b>: اعمل Property وWeb stream لرابط الموقع، وانسخ الـ Measurement ID. بتشوف الزيارات والمنتجات اللي انشافت وانضافت للسلة والمبيعات.</p>
+    </section>
+
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>الطلبات</h2><button class="btn" id="refreshOrders" style="padding:5px 12px">تحديث</button></div>
+      <p class="hint" id="ordersHint">بتظهر هون الطلبات اللي انعملت من هالمتصفح. اربط قاعدة البيانات وسجّل دخول لتشوف كل الطلبات.</p>
+      <div id="orders" style="display:grid;gap:8px"></div>
+    </section>
+
+
+    <section class="panel">
+      <h2>النشر على الموقع</h2>
+      <p class="hint">اربط الأدمن بالريبو مرة وحدة، وبعدها زر <b>انشر على الموقع</b> بيرفع التعديلات لحاله.</p>
+      <div class="two">
+        <div class="field"><label for="ghOwner">اسم حسابك على GitHub</label><input type="text" id="ghOwner" class="ltr" placeholder="aseel-shamia"></div>
+        <div class="field"><label for="ghRepo">اسم الريبو</label><input type="text" id="ghRepo" class="ltr" placeholder="nool-store"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label for="ghToken">مفتاح GitHub (Token)</label><input type="password" id="ghToken" class="ltr" placeholder="github_pat_..." autocomplete="off"></div>
+      <p class="note">المفتاح بينحفظ بهالمتصفح بس، وما بيطلع لأي مكان غير GitHub.</p>
+      <details class="note" style="margin:6px 0 12px"><summary style="cursor:pointer;color:var(--ink)">كيف أعمل المفتاح؟</summary>
+        <ol class="steps" style="margin-top:8px">
+          <li>على GitHub: صورتك فوق ← <b>Settings</b> ← <b>Developer settings</b> ← <b>Personal access tokens</b> ← <b>Fine-grained tokens</b> ← <b>Generate new token</b>.</li>
+          <li>سمّيه <code>nool-admin</code>، وتحت <b>Repository access</b> اختار <b>Only select repositories</b> واختار الريبو تبعك بس.</li>
+          <li>تحت <b>Permissions</b> ← <b>Contents</b> اختار <b>Read and write</b>.</li>
+          <li>اضغط <b>Generate token</b>، انسخه وحطه هون. ما تبعته لحدا.</li>
+        </ol>
+      </details>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn primary" id="publishBtn">انشر على الموقع</button>
+        <span class="status" id="pubStatus"></span>
+      </div>
+      <p class="note" style="margin-top:14px">شغلك بينحفظ كمسودة بهالمتصفح بشكل تلقائي. <button class="btn" id="importBtn" style="padding:4px 10px">افتح ملف store-data.js</button> <button class="btn danger" id="revertBtn" style="padding:4px 10px">ارجع للنسخة المنشورة</button></p>
+      <input type="file" id="importFile" accept=".js,.json" hidden>
+    </section>
+  </div>
+
+  <section class="panel" id="editorPanel">
+    <h2 id="edTitle">قطعة جديدة</h2>
+    <p class="hint">ارفع صورة القطعة. الأفضل تكون على خلفية بيضاء أو سادة، أو PNG شفاف.</p>
+    <div class="editor">
+      <div style="display:grid;gap:14px;min-width:0">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="ارفع صورة"><div class="ph">اسحب الصورة لهون أو اضغط لتختارها</div></div>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+        <div class="two">
+          <label class="check"><input type="checkbox" id="rmBg" checked> شيل الخلفية تلقائياً</label>
+          <div class="slider"><span>الدقّة</span><input type="range" id="tol" min="6" max="60" value="22"><output id="tolOut">22</output></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="nameAr">الاسم بالعربي</label><input type="text" id="nameAr"></div>
+          <div class="field"><label for="nameEn">الاسم بالإنجليزي</label><input type="text" id="nameEn" class="ltr"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="colorAr">اللون بالعربي</label><input type="text" id="colorAr"></div>
+          <div class="field"><label for="colorEn">اللون بالإنجليزي</label><input type="text" id="colorEn" class="ltr"></div>
+        </div>
+        <div class="three">
+          <div class="field"><label for="price">السعر ₪</label><input type="number" id="price" min="0" class="ltr"></div>
+          <div class="field"><label for="was">قبل الخصم ₪</label><input type="number" id="was" min="0" class="ltr" placeholder="اختياري"></div>
+          <div class="field"><label for="rating">التقييم</label><input type="number" id="rating" min="0" max="5" step="0.1" class="ltr"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="cat">القسم</label>
+            <select id="cat"><option value="top">بلايز وكنزات</option><option value="hoodie">هوديز</option><option value="outer">جاكيتات ومعاطف</option><option value="bottom">تنانير وبناطيل</option></select></div>
+          <div class="field"><label for="layer">مكانها على المودل</label>
+            <select id="layer"><option value="top">بلوزة (على الصدر)</option><option value="outer">جاكيت (فوق البلوزة)</option><option value="bottom">تحت (من الخصر)</option></select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="descAr">الوصف بالعربي</label><textarea id="descAr" rows="3" style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit"></textarea></div>
+          <div class="field"><label for="descEn">الوصف بالإنجليزي</label><textarea id="descEn" rows="3" class="ltr" style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit"></textarea></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="matAr">الخامة بالعربي</label><input type="text" id="matAr" placeholder="مثلاً: 70% صوف، 30% بوليستر"></div>
+          <div class="field"><label for="matEn">الخامة بالإنجليزي</label><input type="text" id="matEn" class="ltr" placeholder="e.g. 70% wool, 30% polyester"></div>
+          <div class="field"><label for="fitAr">القصّة بالعربي</label><input type="text" id="fitAr" placeholder="مثلاً: فضفاضة"></div>
+          <div class="field"><label for="fitEn">القصّة بالإنجليزي</label><input type="text" id="fitEn" class="ltr" placeholder="e.g. Relaxed"></div>
+          <div class="field"><label for="featAr">المميزات بالعربي (كل وحدة بسطر)</label><textarea id="featAr" rows="3" style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit"></textarea></div>
+          <div class="field"><label for="featEn">المميزات بالإنجليزي (كل وحدة بسطر)</label><textarea id="featEn" rows="3" class="ltr" style="width:100%;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit"></textarea></div>
+          <div class="field"><label for="stock">الكمية (إذا ما في كمية لكل مقاس)</label><input type="number" id="stock" min="0" class="ltr" placeholder="فاضي = متوفرة دايماً"></div>
+          <div class="field"><label for="sku">رمز القطعة (SKU)</label><input type="text" id="sku" class="ltr" placeholder="NL-001"></div>
+        </div>
+        <div class="field"><label>صور إضافية (زوايا ثانية)</label><div id="extra" style="display:flex;gap:8px;flex-wrap:wrap"></div><input type="file" id="extraFile" accept="image/*" multiple></div>
+        <div class="field"><label for="sizes">المقاسات (افصل بفاصلة)</label><input type="text" id="sizes" class="ltr" value="XS, S, M, L, XL"></div>
+        <div class="field"><label>الكمية لكل مقاس <span class="note">(اختياري، إذا عبّيتها بتنحسب بدل الكمية العامة)</span></label><div id="sizeStock" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+        <div class="three">
+          <label class="check"><input type="checkbox" id="cutout" checked> صورة مقصوصة</label>
+          <label class="check"><input type="checkbox" id="rail" checked> اعرضها على الراك</label>
+          <label class="check"><input type="checkbox" id="hidden"> مخفية</label>
+        </div>
+        <div class="slider"><span>طولها على الراك</span><input type="range" id="h" min="120" max="280" value="170"><output id="hOut">170</output></div>
+      </div>
+      <div class="fitbox">
+        <div class="booth"><div class="model" id="fitModel"></div></div>
+        <div class="slider"><span>الحجم</span><input type="range" id="fs" min="0.5" max="1.6" step="0.01" value="1"><output id="fsOut">1</output></div>
+        <div class="slider"><span>فوق/تحت</span><input type="range" id="fy" min="-40" max="40" step="0.5" value="0"><output id="fyOut">0</output></div>
+        <div class="slider"><span>يمين/يسار</span><input type="range" id="fx" min="-40" max="40" step="0.5" value="0"><output id="fxOut">0</output></div>
+        <p class="note">ظبّط القطعة على جسم المودل. هيك بتظهر للزبون بغرفة القياس.</p>
+      </div>
+    </div>
+    <div class="formacts">
+      <button class="btn primary" id="saveBtn">احفظ القطعة</button>
+      <button class="btn" id="cancelBtn">إلغاء</button>
+      <span class="status" id="edStatus"></span>
+    </div>
+  </section>
+</div></main>
+<div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>document.write('<script src="store-data.js?v='+Date.now()+'"><\/script>')</script>
+<script>
+const $=s=>document.querySelector(s);
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}}};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const PUBLISHED = window.NOOL_DATA ? clone(window.NOOL_DATA) : {siteName:'NOOL', model:'', products:[], startLook:[]};
+let D;
+try { D = JSON.parse(ls.get('nool-draft')) } catch(e){}
+if(!D || !D.products) D = clone(PUBLISHED);
+const CATN={top:'بلايز وكنزات',hoodie:'هوديز',outer:'جاكيتات ومعاطف',bottom:'تنانير وبناطيل'};
+const LAYN={top:'بلوزة',outer:'جاكيت',bottom:'تحت'};
+let editId=null, curImg=null, rawImg=null;
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2200)}
+function persist(){
+  const ok=ls.set('nool-draft',JSON.stringify(D));
+  const st=$('#status'); st.classList.toggle('warn',!ok);
+  st.textContent = ok ? 'المسودة محفوظة بهالمتصفح' : 'المسودة كبيرة على ذاكرة المتصفح، نزّل الملف حتى ما يضيع شغلك';
+  $('#hdrName').textContent=D.siteName||'NOOL';
+}
+
+/* ---------- settings ---------- */
+$('#siteName').value=D.siteName||'';
+$('#siteName').addEventListener('input',e=>{D.siteName=e.target.value.trim()||'NOOL';persist()});
+$('#modelFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const im=await loadImg(f);D.model=encode(trim(drawScaled(im,1100,true)));persist();renderFit();toast('تغيّرت صورة المودل')});
+
+/* ---------- list ---------- */
+function renderList(){
+  $('#countLine').textContent=`${D.products.length} قطعة · ${D.products.filter(p=>p.hidden).length} مخفية`;
+  $('#list').innerHTML=D.products.map((p,i)=>`<div class="item${p.id===editId?' sel':''}${p.hidden?' off':''}" data-id="${p.id}">
+    <div class="thumb${p.cutout?'':' photo'}"><img src="${p.img}" alt=""></div>
+    <div style="min-width:0"><h4>${p.name.ar||p.name.en}${p.was?'<span class="badge">خصم</span>':''}${p.hidden?'<span class="badge">مخفية</span>':''}</h4><small><span class="ltr">₪${p.price}</span> · ${CATN[p.cat]} · ${LAYN[p.layer]}${p.cutout?'':' · بدون غرفة قياس'}</small></div>
+    <div class="acts">
+      <button class="ib" data-a="up" aria-label="لفوق" ${i===0?'disabled':''}>↑</button>
+      <button class="ib" data-a="down" aria-label="لتحت" ${i===D.products.length-1?'disabled':''}>↓</button>
+      <button class="ib" data-a="edit" aria-label="عدّل">✎</button>
+      <button class="ib danger" data-a="del" aria-label="احذف">✕</button>
+    </div>
+    <div class="confirm">متأكد؟ <button class="btn danger" data-a="yes" style="padding:4px 10px">احذف</button><button class="btn" data-a="no" style="padding:4px 10px">لا</button></div>
+  </div>`).join('') || '<p class="note">ما في منتجات لسا. اضغط "قطعة جديدة".</p>';
+}
+$('#list').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); const it=e.target.closest('.item'); if(!it) return;
+  const id=it.dataset.id, i=D.products.findIndex(p=>p.id===id); const a=b?b.dataset.a:'edit';
+  if(a==='up'&&i>0){[D.products[i-1],D.products[i]]=[D.products[i],D.products[i-1]];persist();renderList()}
+  else if(a==='down'&&i<D.products.length-1){[D.products[i+1],D.products[i]]=[D.products[i],D.products[i+1]];persist();renderList()}
+  else if(a==='del'){it.classList.add('asking')}
+  else if(a==='no'){it.classList.remove('asking')}
+  else if(a==='yes'){D.products.splice(i,1); D.startLook=(D.startLook||[]).filter(x=>x!==id); if(editId===id) resetForm(); persist(); renderList(); toast('انحذفت القطعة')}
+  else if(a==='edit'){loadForm(D.products[i])}
+});
+
+/* ---------- form ---------- */
+const F=['nameAr','nameEn','colorAr','colorEn','price','was','rating','cat','layer','sizes','cutout','rail','hidden','h','fs','fy','fx'];
+function resetForm(){
+  editId=null; curImg=null; rawImg=null;
+  $('#edTitle').textContent='قطعة جديدة';
+  ['nameAr','nameEn','colorAr','colorEn','price','was','descAr','descEn','matAr','matEn','fitAr','fitEn','featAr','featEn','stock','sku'].forEach(k=>$('#'+k).value=''); extraImgs=[]; renderExtra(); sizeStockVals={}; renderSizeStock();
+  $('#rating').value='4.5'; $('#cat').value='top'; $('#layer').value='top'; $('#sizes').value='XS, S, M, L, XL';
+  $('#cutout').checked=true; $('#rail').checked=true; $('#hidden').checked=false; $('#h').value=170;
+  $('#fs').value=1; $('#fy').value=0; $('#fx').value=0; syncOut(); showImg(); renderList(); renderFit();
+}
+function loadForm(p){
+  editId=p.id; curImg=p.img; rawImg=null;
+  $('#edTitle').textContent='تعديل: '+(p.name.ar||p.name.en);
+  $('#nameAr').value=p.name.ar||''; $('#nameEn').value=p.name.en||'';
+  $('#colorAr').value=(p.color&&p.color.ar)||''; $('#colorEn').value=(p.color&&p.color.en)||'';
+  $('#price').value=p.price; $('#was').value=p.was||''; $('#rating').value=p.rating||'';
+  $('#descAr').value=(p.desc&&p.desc.ar)||''; $('#descEn').value=(p.desc&&p.desc.en)||'';
+  $('#matAr').value=(p.material&&p.material.ar)||''; $('#matEn').value=(p.material&&p.material.en)||'';
+  $('#fitAr').value=(p.cut&&p.cut.ar)||''; $('#fitEn').value=(p.cut&&p.cut.en)||'';
+  $('#featAr').value=((p.features&&p.features.ar)||[]).join('\n'); $('#featEn').value=((p.features&&p.features.en)||[]).join('\n');
+  $('#stock').value=(p.stock??''); $('#sku').value=p.sku||''; extraImgs=(p.imgs||[]).slice(); renderExtra(); sizeStockVals={...(p.stockBySize||{})}; renderSizeStock();
+  $('#cat').value=p.cat; $('#layer').value=p.layer; $('#sizes').value=(p.sizes||['XS','S','M','L','XL']).join(', ');
+  $('#cutout').checked=!!p.cutout; $('#rail').checked=p.rail!==false; $('#hidden').checked=!!p.hidden; $('#h').value=p.h||170;
+  const f=p.fit||{}; $('#fs').value=f.s||1; $('#fy').value=f.y||0; $('#fx').value=f.x||0;
+  syncOut(); showImg(); renderList(); renderFit();
+  $('#editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function syncOut(){ $('#hOut').value=$('#h').value; $('#fsOut').value=(+$('#fs').value).toFixed(2); $('#fyOut').value=$('#fy').value; $('#fxOut').value=$('#fx').value; $('#tolOut').value=$('#tol').value; }
+['h','fs','fy','fx','tol'].forEach(k=>$('#'+k).addEventListener('input',()=>{syncOut(); if(k==='tol') reprocess(); else renderFit();}));
+$('#layer').addEventListener('change',renderFit);
+$('#cat').addEventListener('change',()=>{ const m={top:'top',hoodie:'top',outer:'outer',bottom:'bottom'}; $('#layer').value=m[$('#cat').value]; renderFit(); });
+$('#cutout').addEventListener('change',renderFit);
+$('#rmBg').addEventListener('change',reprocess);
+
+function showImg(){ $('#drop').innerHTML = curImg ? `<img src="${curImg}" alt="">` : '<div class="ph">اسحب الصورة لهون أو اضغط لتختارها</div>'; }
+function renderFit(){
+  const layer=$('#layer').value;
+  const others = Object.fromEntries(['top','outer','bottom'].map(s=>[s,null]));
+  (D.startLook||[]).forEach(id=>{const p=D.products.find(x=>x.id===id); if(p&&p.id!==editId&&p.cutout) others[p.layer]=p;});
+  const fit={s:+$('#fs').value,y:+$('#fy').value,x:+$('#fx').value};
+  const g=(s)=>{
+    if(s===layer && curImg && $('#cutout').checked) return `<img class="g ${s} cur" src="${curImg}" alt="" style="transform:translate(${fit.x}%,${fit.y}%) scale(${fit.s})">`;
+    const p=others[s]; if(!p || s===layer) return '';
+    const f=p.fit||{}; return `<img class="g ${s}" src="${p.img}" alt="" style="opacity:.55;transform:translate(${f.x||0}%,${f.y||0}%) scale(${f.s||1})">`;
+  };
+  $('#fitModel').innerHTML = (D.model?`<img src="${D.model}" alt="">`:'') + g('bottom') + g('top') + g('outer');
+}
+
+/* ---------- image processing ---------- */
+function loadImg(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=r.result}; r.onerror=rej; r.readAsDataURL(file); }); }
+function drawScaled(im,maxH,keepAlpha){
+  const s=Math.min(1, maxH/im.naturalHeight, 900/im.naturalWidth);
+  const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*s); c.height=Math.round(im.naturalHeight*s);
+  const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(im,0,0,c.width,c.height); return c;
+}
+function removeBg(c,tol){
+  const x=c.getContext('2d',{willReadFrequently:true}), W=c.width, H=c.height, id=x.getImageData(0,0,W,H), d=id.data;
+  const bs=[]; for(let i=0;i<W;i+=3){bs.push(i, (H-1)*W+i)} for(let j=0;j<H;j+=3){bs.push(j*W, j*W+W-1)}
+  const med=k=>{const a=bs.map(p=>d[p*4+k]).sort((m,n)=>m-n);return a[a.length>>1]};
+  const br=med(0),bg=med(1),bb=med(2), t2=tol*tol*3;
+  const near=p=>{const r=d[p*4]-br,g=d[p*4+1]-bg,b=d[p*4+2]-bb;return r*r+g*g+b*b<t2 && d[p*4+3]>0};
+  const seen=new Uint8Array(W*H), q=new Int32Array(W*H); let h=0,tl=0;
+  for(const p of bs){ if(!seen[p]&&near(p)){seen[p]=1;q[tl++]=p} }
+  while(h<tl){const p=q[h++]; const px=p%W; const nb=[p-W,p+W,px>0?p-1:-1,px<W-1?p+1:-1];
+    for(const n of nb){ if(n>=0&&n<W*H&&!seen[n]&&near(n)){seen[n]=1;q[tl++]=n} } }
+  for(let p=0;p<W*H;p++) if(seen[p]) d[p*4+3]=0;
+  for(let p=0;p<W*H;p++){ if(seen[p]) continue; const px=p%W;
+    if((p>=W&&seen[p-W])||(p<W*(H-1)&&seen[p+W])||(px>0&&seen[p-1])||(px<W-1&&seen[p+1])) d[p*4+3]=Math.min(d[p*4+3],150); }
+  x.putImageData(id,0,0); return c;
+}
+function trim(c){
+  const x=c.getContext('2d',{willReadFrequently:true}), {width:W,height:H}=c, d=x.getImageData(0,0,W,H).data;
+  let x0=W,y0=H,x1=-1,y1=-1;
+  for(let y=0;y<H;y++)for(let i=0;i<W;i++) if(d[(y*W+i)*4+3]>16){ if(i<x0)x0=i; if(i>x1)x1=i; if(y<y0)y0=y; if(y>y1)y1=y; }
+  if(x1<0) return c;
+  const o=document.createElement('canvas'); o.width=x1-x0+1; o.height=y1-y0+1; o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height); return o;
+}
+function encode(c){ let u=c.toDataURL('image/webp',0.82); if(!u.startsWith('data:image/webp')) u=c.toDataURL('image/png'); return u; }
+function reprocess(){
+  if(!rawImg) return;
+  let c=drawScaled(rawImg,760);
+  if($('#rmBg').checked){ c=trim(removeBg(c,+$('#tol').value)); $('#cutout').checked=true; }
+  else { $('#cutout').checked=false; }
+  curImg=encode(c); showImg(); renderFit();
+  $('#edStatus').textContent=`${c.width}×${c.height} · ${Math.round(curImg.length*0.75/1024)} KB`;
+}
+async function takeFile(f){ if(!f||!f.type.startsWith('image/')) return toast('اختار ملف صورة'); rawImg=await loadImg(f); reprocess(); }
+const drop=$('#drop');
+drop.addEventListener('click',()=>$('#imgFile').click());
+drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#imgFile').click()}});
+$('#imgFile').addEventListener('change',e=>takeFile(e.target.files[0]));
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');takeFile(e.dataTransfer.files[0])});
+
+/* ---------- stock per size ---------- */
+let sizeStockVals={};
+function renderSizeStock(){
+  const sz=$('#sizes').value.split(',').map(x=>x.trim()).filter(Boolean);
+  $('#sizeStock').innerHTML=sz.map(z=>`<label style="display:grid;gap:4px;font-size:12px;color:var(--ink-2);text-align:center;width:64px"><span class="ltr">${z}</span><input type="number" min="0" class="ltr" data-ss="${z}" value="${sizeStockVals[z]??''}" placeholder="—" style="width:64px;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:7px;text-align:center"></label>`).join('');
+}
+$('#sizeStock').addEventListener('input',e=>{const i=e.target.closest('[data-ss]');if(!i)return;if(i.value==='')delete sizeStockVals[i.dataset.ss];else sizeStockVals[i.dataset.ss]=Math.max(0,+i.value);});
+$('#sizes').addEventListener('input',renderSizeStock);
+
+/* ---------- extra images ---------- */
+let extraImgs=[];
+function renderExtra(){ $('#extra').innerHTML=extraImgs.map((u,i)=>`<div style="position:relative;width:64px;height:72px;border-radius:10px;background:var(--studio);display:grid;place-items:center;border:1px solid var(--line)"><img src="${u}" style="max-width:90%;max-height:90%;object-fit:contain"><button class="ib danger" data-rx="${i}" style="position:absolute;top:-8px;inset-inline-end:-8px;width:22px;height:22px;border-radius:50%" aria-label="احذف الصورة">✕</button></div>`).join(''); }
+$('#extra').addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;extraImgs.splice(+b.dataset.rx,1);renderExtra();});
+$('#extraFile').addEventListener('change',async e=>{ for(const f of e.target.files){ const im=await loadImg(f); let c=drawScaled(im,760); if($('#rmBg').checked) c=trim(removeBg(c,+$('#tol').value)); extraImgs.push(encode(c)); } e.target.value=''; renderExtra(); });
+
+/* ---------- save ---------- */
+$('#saveBtn').addEventListener('click',()=>{
+  const ar=$('#nameAr').value.trim(), en=$('#nameEn').value.trim(), price=+$('#price').value;
+  if(!curImg) return toast('ارفع صورة القطعة أول');
+  if(!ar && !en) return toast('اكتب اسم القطعة');
+  if(!(price>0)) return toast('اكتب سعر صحيح');
+  const p={
+    id: editId || ('p'+Date.now().toString(36)),
+    name:{ar:ar||en, en:en||ar}, color:{ar:$('#colorAr').value.trim(), en:$('#colorEn').value.trim()},
+    desc:{ar:$('#descAr').value.trim(), en:$('#descEn').value.trim()},
+    material:{ar:$('#matAr').value.trim(), en:$('#matEn').value.trim()}, cut:{ar:$('#fitAr').value.trim(), en:$('#fitEn').value.trim()},
+    features:{ar:$('#featAr').value.split('\n').map(x=>x.trim()).filter(Boolean), en:$('#featEn').value.split('\n').map(x=>x.trim()).filter(Boolean)},
+    stock: $('#stock').value===''?undefined:Math.max(0,+$('#stock').value), stockBySize: Object.keys(sizeStockVals).length?{...sizeStockVals}:undefined, sku:$('#sku').value.trim()||undefined, imgs: extraImgs.length?extraImgs.slice():undefined,
+    price, rating: +$('#rating').value || undefined, cat:$('#cat').value, layer:$('#layer').value,
+    sizes: $('#sizes').value.split(',').map(s=>s.trim()).filter(Boolean),
+    cutout: $('#cutout').checked, rail: $('#rail').checked, hidden: $('#hidden').checked || undefined,
+    h: +$('#h').value, fit:{s:+$('#fs').value, y:+$('#fy').value, x:+$('#fx').value}, img: curImg
+  };
+  const was=+$('#was').value; if(was>price) p.was=was;
+  const i=D.products.findIndex(x=>x.id===p.id);
+  if(i>=0) D.products[i]=p; else D.products.unshift(p);
+  persist(); toast(i>=0?'انحفظت التعديلات':'انضافت القطعة'); if(fbUser) pushStock([p]).catch(()=>{}); resetForm();
+});
+$('#cancelBtn').addEventListener('click',resetForm);
+$('#newBtn').addEventListener('click',()=>{resetForm();$('#editorPanel').scrollIntoView({behavior:'smooth'})});
+
+/* ---------- export / import ---------- */
+function exportText(){ return '/* NOOL store data. Generated by admin.html. */\nwindow.NOOL_DATA = ' + JSON.stringify(D) + ';\n'; }
+$('#exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([exportText()],{type:'text/javascript'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='store-data.js'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast('نزلت نسخة من الملف على جهازك');
+});
+$('#importBtn').addEventListener('click',()=>$('#importFile').click());
+$('#importFile').addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return; const txt=await f.text();
+  try{ const j=JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1)); if(!j.products) throw 0; D=j; persist(); toast('انفتح الملف'); setTimeout(()=>location.reload(),600); }
+  catch(err){ toast('هاد الملف مش ملف store-data.js صالح'); }
+});
+let revertArmed=false;
+$('#revertBtn').addEventListener('click',e=>{
+  if(!revertArmed){ revertArmed=true; e.target.textContent='اضغط كمان مرة للتأكيد'; setTimeout(()=>{revertArmed=false;e.target.textContent='ارجع للنسخة المنشورة'},3000); return; }
+  D=clone(PUBLISHED); persist(); toast('رجعت للنسخة المنشورة'); setTimeout(()=>location.reload(),600); revertArmed=false; e.target.textContent='ارجع للنسخة المنشورة';
+});
+$('#previewBtn').addEventListener('click',persist);
+
+/* ---------- publish to GitHub ---------- */
+const GH={owner:$('#ghOwner'),repo:$('#ghRepo'),token:$('#ghToken')};
+GH.owner.value=ls.get('nool-gh-owner')||'aseel-shamia'; GH.repo.value=ls.get('nool-gh-repo')||'nool-store-'; GH.token.value=ls.get('nool-gh-token')||'';
+Object.entries(GH).forEach(([k,el])=>el.addEventListener('change',()=>ls.set('nool-gh-'+k,el.value.trim())));
+function b64(str){ const bytes=new TextEncoder().encode(str); let bin=''; for(let i=0;i<bytes.length;i+=0x8000) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000)); return btoa(bin); }
+async function publish(){
+  const owner=GH.owner.value.trim(), repo=GH.repo.value.trim(), token=GH.token.value.trim(), st=$('#pubStatus');
+  st.classList.remove('warn');
+  if(!owner||!repo||!token){ st.classList.add('warn'); st.textContent='عبّي اسم الحساب والريبو والمفتاح أول'; $('#ghToken').scrollIntoView({behavior:'smooth',block:'center'}); toast('اربط الأدمن بالريبو أول'); return; }
+  const btns=[$('#publishBtn'),$('#publishTop')]; btns.forEach(b=>b.disabled=true); st.textContent='عم بنشر...';
+  const api=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/`;
+  const url=api+'store-data.js';
+  const H={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'};
+  try{
+    /* ارفع أي صورة جديدة كملف لحاله بمجلد img بدل ما تنحط جوّا store-data.js */
+    const jobs=[];
+    const q=(obj,key,base)=>{ const v=obj[key]; if(typeof v==='string'&&v.startsWith('data:')) jobs.push({obj,key,base,data:v}); };
+    D.products.forEach(p=>{ q(p,'img',p.id); (p.imgs||[]).forEach((_,i)=>q(p.imgs,i,p.id+'-'+(i+2))); });
+    if(D.model) q(D,'model','model');
+    let n=0;
+    for(const j of jobs){
+      n++; st.textContent=`عم برفع الصور ${n} / ${jobs.length}...`;
+      const m=j.data.match(/^data:image\/(\w+);base64,(.*)$/); if(!m) continue;
+      const ext=m[1]==='jpeg'?'jpg':m[1], path=`img/${String(j.base).replace(/[^\w-]/g,'')}-${Date.now().toString(36)}.${ext}`;
+      const r=await fetch(api+path,{method:'PUT',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({message:'Add image '+path,content:m[2]})});
+      if(!r.ok) throw r;
+      j.obj[j.key]=path;
+    }
+    if(jobs.length){ persist(); renderList(); }
+    st.textContent='عم بنشر المنتجات...';
+    let sha; const g=await fetch(url+'?t='+Date.now(),{headers:H});
+    if(g.status===200) sha=(await g.json()).sha; else if(g.status!==404) throw g;
+    const r=await fetch(url,{method:'PUT',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({message:'Update store from admin',content:b64(exportText()),sha})});
+    if(!r.ok) throw r;
+    const t=new Date(); st.textContent=`انتشر الساعة ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}. بيظهر للزبائن خلال دقيقة أو دقيقتين.`;
+    toast('انتشرت التعديلات على الموقع');
+  }catch(err){
+    st.classList.add('warn');
+    const code=err&&err.status;
+    st.textContent = code===401 ? 'المفتاح غلط أو منتهي. اعمل مفتاح جديد.'
+      : code===403 ? 'المفتاح ما إله صلاحية كتابة. فعّل Contents: Read and write.'
+      : code===404 ? 'ما لقيت الريبو. تأكد من اسم الحساب والريبو، وإنه المفتاح إله وصول عليه.'
+      : code===409||code===422 ? 'صار تعارض مع نسخة ثانية. جرّب تنشر كمان مرة.'
+      : 'ما زبط النشر. تأكد من الإنترنت وجرّب كمان مرة.';
+  }finally{ btns.forEach(b=>b.disabled=false); }
+}
+$('#publishBtn').addEventListener('click',publish);
+$('#publishTop').addEventListener('click',publish);
+
+/* ---------- store settings ---------- */
+const DEF_S={whatsapp:'970590000000',phone:'0590000000',email:'hello@nool.store',instagram:'nool.store',city:{ar:'رام الله، فلسطين',en:'Ramallah, Palestine'},
+  regions:[{id:'wb',ar:'الضفة الغربية',en:'West Bank',fee:20,days:'2-3'},{id:'jr',ar:'القدس',en:'Jerusalem',fee:30,days:'2-4'},{id:'in',ar:'الداخل المحتل',en:'1948 areas',fee:70,days:'3-5'}],
+  freeOver:300,returnDays:14,payments:{cod:true,jawwal:true,bop:true,paypal:true,visa:true},jawwalNumber:'0590000000',jawwalName:'NOOL Store',bopName:'NOOL Store',bopIban:'PS00 PALS 0000 0000 0000 0000 0000 0',paypalClientId:'test',coupons:[{code:'NOOL10',pct:10},{code:'WELCOME15',pct:15}]};
+D.settings=Object.assign(clone(DEF_S),D.settings||{}); D.settings.payments=Object.assign({},DEF_S.payments,D.settings.payments||{});
+const SS=D.settings;
+const getPath=(o,p)=>p.split('.').reduce((a,k)=>a&&a[k],o);
+const setPath=(o,p,v)=>{const ks=p.split('.');const last=ks.pop();const t=ks.reduce((a,k)=>(a[k]=a[k]||{}),o);t[last]=v;};
+document.querySelectorAll('[data-s]').forEach(el=>{ el.value=getPath(SS,el.dataset.s)??''; el.addEventListener('input',()=>{ setPath(SS,el.dataset.s, el.hasAttribute('data-num')?(+el.value||0):el.value.trim()); persist(); }); });
+document.querySelectorAll('[data-pay]').forEach(el=>{ el.checked=!!SS.payments[el.dataset.pay]; el.addEventListener('change',()=>{ SS.payments[el.dataset.pay]=el.checked; persist(); }); });
+function renderRegions(){
+  $('#regions').innerHTML=SS.regions.map((r,i)=>`<div class="three" data-ri="${i}"><div class="field"><label>المنطقة</label><input type="text" value="${r.ar}" data-k="ar"></div><div class="field"><label>السعر ₪</label><input type="number" class="ltr" value="${r.fee}" data-k="fee"></div><div class="field"><label>المدة (أيام)</label><input type="text" class="ltr" value="${r.days}" data-k="days"></div></div>`).join('');
+}
+$('#regions').addEventListener('input',e=>{const row=e.target.closest('[data-ri]');if(!row)return;const r=SS.regions[+row.dataset.ri],k=e.target.dataset.k;r[k]=k==='fee'?(+e.target.value||0):e.target.value;persist();});
+function renderCoupons(){
+  $('#coupons').innerHTML=(SS.coupons||[]).map((c,i)=>`<div style="display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:end" data-ci="${i}"><div class="field"><label>الكود</label><input type="text" class="ltr" value="${c.code}" data-k="code" style="text-transform:uppercase"></div><div class="field"><label>الخصم %</label><input type="number" class="ltr" value="${c.pct}" data-k="pct" min="1" max="90"></div><button class="ib danger" data-delc aria-label="احذف الكود">✕</button></div>`).join('') || '<p class="note">ما في أكواد.</p>';
+}
+$('#coupons').addEventListener('input',e=>{const row=e.target.closest('[data-ci]');if(!row)return;const c=SS.coupons[+row.dataset.ci],k=e.target.dataset.k;c[k]=k==='pct'?Math.max(1,Math.min(90,+e.target.value||0)):e.target.value.trim().toUpperCase();persist();});
+$('#coupons').addEventListener('click',e=>{const b=e.target.closest('[data-delc]');if(!b)return;SS.coupons.splice(+b.closest('[data-ci]').dataset.ci,1);persist();renderCoupons();});
+$('#addCoupon').addEventListener('click',()=>{SS.coupons=SS.coupons||[];SS.coupons.push({code:'NEW'+(SS.coupons.length+1),pct:10});persist();renderCoupons();});
+renderRegions(); renderCoupons();
+
+/* ---------- Firebase (admin) ---------- */
+const FBV='10.12.2';
+const loadJS=src=>new Promise((res,rej)=>{ if(document.querySelector(`script[src="${src}"]`)) return res(); const sc=document.createElement('script'); sc.src=src; sc.onload=res; sc.onerror=()=>rej(new Error('load')); document.head.appendChild(sc); });
+let fbUser=null, unsubOrders=null, remoteOrders=null;
+const fbReady=()=>SS.firebase&&SS.firebase.apiKey&&SS.firebase.projectId;
+async function fb(){
+  if(!fbReady()) throw new Error('noconfig');
+  if(!window.firebase) await loadJS(`https://www.gstatic.com/firebasejs/${FBV}/firebase-app-compat.js`);
+  if(!firebase.auth) await loadJS(`https://www.gstatic.com/firebasejs/${FBV}/firebase-auth-compat.js`);
+  if(!firebase.firestore) await loadJS(`https://www.gstatic.com/firebasejs/${FBV}/firebase-firestore-compat.js`);
+  if(!firebase.apps.length) firebase.initializeApp(SS.firebase);
+  return firebase;
+}
+function rulesText(){
+  const em=(SS.firebase&&SS.firebase.adminEmail)||'YOUR-ADMIN-EMAIL';
+  const ks=['XS','S','M','L','XL','XXL','ONE'];
+  return `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() { return request.auth != null && request.auth.token.email == '${em}'; }
+    function q(m, k) { return m.get(k, 0); }
+    function onlyDecreases() {
+      let a = resource.data.sizes;
+      let b = request.resource.data.sizes;
+      return request.resource.data.keys().hasOnly(['sizes']) && b.keys().hasOnly(a.keys())
+        && ${ks.map(k=>`q(b,'${k}') <= q(a,'${k}') && q(b,'${k}') >= 0`).join('\n        && ')};
+    }
+    match /orders/{id} {
+      allow create: if request.resource.data.status == 0
+        && request.resource.data.total is number
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0 && request.resource.data.items.size() < 50;
+      allow get: if true;
+      allow list, update, delete: if isAdmin();
+    }
+    match /stock/{pid} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || onlyDecreases();
+    }
+  }
+}`;
+}
+function fbUI(){
+  $('#fbRules').value=rulesText();
+  $('#fbCfgStatus').textContent=fbReady()?`مربوط بمشروع ${SS.firebase.projectId}`:'لسا ما في إعدادات';
+  $('#fbLogin').hidden=!!fbUser; $('#fbLogout').hidden=!fbUser; $('#fbStock').hidden=!fbUser; $('#fbPass').closest('.field').hidden=!!fbUser;
+  $('#fbStatus').textContent=fbUser?`مسجّل دخول: ${fbUser.email}`:(fbReady()?'مش مسجّل دخول':'مش مربوطة');
+  $('#ordersHint').textContent=fbUser?'كل الطلبات من قاعدة البيانات، بتتحدث لحالها.':'بتظهر هون الطلبات اللي انعملت من هالمتصفح. اربط قاعدة البيانات وسجّل دخول لتشوف كل الطلبات.';
+}
+$('#fbAdmin').addEventListener('input',()=>{$('#fbRules').value=rulesText();});
+$('#fbSave').addEventListener('click',()=>{
+  const t=$('#fbPaste').value, cfg={}; let m; const re=/(apiKey|authDomain|projectId|storageBucket|messagingSenderId|appId|measurementId)\s*["']?\s*:\s*["']([^"']+)["']/g;
+  while((m=re.exec(t))) cfg[m[1]]=m[2];
+  if(!cfg.apiKey||!cfg.projectId){ $('#fbCfgStatus').textContent='ما لقيت apiKey و projectId. الصق الكود كامل.'; return; }
+  SS.firebase={...cfg, adminEmail:(SS.firebase&&SS.firebase.adminEmail)||''}; persist(); fbUI(); toast('انحفظت إعدادات Firebase. اضغط انشر على الموقع');
+  if(window.firebase&&firebase.apps.length) setTimeout(()=>location.reload(),900);
+});
+$('#copyRules').addEventListener('click',()=>{ const t=$('#fbRules'); (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('انتسخت القواعد')).catch(()=>{t.select();toast('اضغط Ctrl+C');}); });
+$('#fbLogin').addEventListener('click',async()=>{
+  const em=$('#fbAdmin').value.trim(), pw=$('#fbPass').value; const st=$('#fbStatus');
+  if(!fbReady()){ st.textContent='الصق firebaseConfig أول'; return; }
+  if(!em||!pw){ st.textContent='اكتب الإيميل وكلمة السر'; return; }
+  st.textContent='عم بسجّل دخول...';
+  try{ const f=await fb(); await f.auth().signInWithEmailAndPassword(em,pw); $('#fbPass').value=''; }
+  catch(e){ st.textContent=({'auth/invalid-credential':'الإيميل أو كلمة السر غلط','auth/wrong-password':'كلمة السر غلط','auth/user-not-found':'هاد الإيميل مش مضاف بـ Authentication','auth/unauthorized-domain':'ضيف رابط الموقع بـ Authorized domains','auth/too-many-requests':'محاولات كثير، استنى شوي'})[e.code]||'ما زبط تسجيل الدخول. تأكد من الإعدادات والإنترنت.'; }
+});
+$('#fbLogout').addEventListener('click',async()=>{ try{ await firebase.auth().signOut(); }catch(e){} });
+function watchOrders(){
+  if(unsubOrders){unsubOrders();unsubOrders=null;}
+  if(!fbUser){ remoteOrders=null; renderOrders(); return; }
+  unsubOrders=firebase.firestore().collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{
+    remoteOrders=[]; snap.forEach(d=>remoteOrders.push({...d.data(),fid:d.id})); renderOrders();
+  },err=>{ $('#fbStatus').textContent='ما في صلاحية تقرأ الطلبات. تأكد من القواعد وإيميل الأدمن.'; });
+}
+if(fbReady()) fb().then(f=>f.auth().onAuthStateChanged(u=>{ fbUser=u; fbUI(); watchOrders(); })).catch(()=>{ $('#fbStatus').textContent='ما قدرت أحمّل Firebase. تأكد من الإنترنت.'; });
+async function pushStock(list){
+  const db=firebase.firestore(); const batch=db.batch(); let n=0;
+  list.filter(p=>p.stockBySize&&Object.keys(p.stockBySize).length).forEach(p=>{ batch.set(db.collection('stock').doc(p.id),{sizes:p.stockBySize}); n++; });
+  if(n) await batch.commit(); return n;
+}
+$('#fbStock').addEventListener('click',async()=>{ try{ const n=await pushStock(D.products); toast(n?`انرفعت كميات ${n} قطع`:'ما في قطع إلها كمية لكل مقاس'); }catch(e){ toast('ما زبط رفع الكميات. تأكد من القواعد.'); } });
+fbUI();
+
+/* ---------- orders ---------- */
+const STAT=['انستلم','قيد التجهيز','انشحن','انوصل'];
+const PAYN={cod:'عند الاستلام',jawwal:'جوال باي',bop:'بنك فلسطين',paypal:'PayPal',visa:'فيزا'};
+function renderOrders(){
+  let all=[]; if(remoteOrders) all=remoteOrders; else { try{all=JSON.parse(ls.get('nool-orders'))||[]}catch(e){} }
+  $('#orders').innerHTML = all.length ? all.map((o,i)=>`<div class="item" style="grid-template-columns:minmax(0,1fr) auto"><div style="min-width:0"><h4><span class="ltr">${o.no}</span> · ${o.customer.name}</h4><small><span class="ltr">₪${o.total}</span> · ${o.items.reduce((s,x)=>s+x.q,0)} قطع · ${PAYN[o.pay]||o.pay} (${({paid:'مدفوع',pending:'بانتظار التحويل',cod:'عند الاستلام'})[o.payStatus]||'—'}) · <span class="ltr">${o.customer.phone}</span></small><small>${o.customer.city}، ${o.customer.addr}${o.ref?` · تحويل #${o.ref}`:''}${o.txn?` · PayPal ${o.txn}`:''}</small>${o.receipt?`<a href="${o.receipt}" target="_blank" rel="noopener" style="font-size:12px">شوف الإيصال</a>`:''}${remoteOrders&&o.payStatus==='pending'?` <button class="btn" data-paid="${i}" style="padding:2px 10px;font-size:12px">أكّد وصول الدفع</button>`:''}</div>
+    <select data-oi="${i}" style="background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px">${STAT.map((s,k)=>`<option value="${k}" ${o.status===k?'selected':''}>${s}</option>`).join('')}</select></div>`).join('') : '<p class="note">ما في طلبات لسا. جرّب تطلب من المتجر.</p>';
+}
+$('#orders').addEventListener('change',e=>{const s=e.target.closest('[data-oi]');if(!s)return;
+  if(remoteOrders){ const o=remoteOrders[+s.dataset.oi]; firebase.firestore().collection('orders').doc(o.fid).update({status:+s.value,...(+s.value>=1&&o.payStatus==='pending'?{}:{})}).then(()=>toast('انحفظت حالة الطلب')).catch(()=>toast('ما انحفظت الحالة. تأكد من الصلاحيات')); return; }
+  let all=[];try{all=JSON.parse(ls.get('nool-orders'))||[]}catch(err){} if(all[+s.dataset.oi]){all[+s.dataset.oi].status=+s.value;ls.set('nool-orders',JSON.stringify(all));toast('انحفظت حالة الطلب');}});
+$('#orders').addEventListener('click',e=>{const b=e.target.closest('[data-paid]');if(!b||!remoteOrders)return;const o=remoteOrders[+b.dataset.paid];firebase.firestore().collection('orders').doc(o.fid).update({payStatus:'paid'}).then(()=>toast('انعلّم الطلب كمدفوع')).catch(()=>toast('ما زبط. تأكد من الصلاحيات'));});
+$('#refreshOrders').addEventListener('click',renderOrders);
+renderOrders();
+
+persist(); resetForm();
+</script>
+
+</body>
+</html>
